@@ -56,17 +56,32 @@ def fetch_video():
     try:
         with YoutubeDL({"quiet": True}) as ydl:
             info = ydl.extract_info(url, download=False)
+
+            # Extract the best thumbnail (if available)
+            thumbnail = info.get("thumbnails", [{}])[-1].get("url", "")
+
             formats = [
                 {
                     "format_id": f["format_id"],
                     "height": f.get("height", "N/A"),
                     "format_note": f.get("format_note", ""),
+                    "filesize": f.get("filesize") or f.get("filesize_approx", None),
                 }
                 for f in info["formats"]
                 if f.get("height") and f["height"] >= 480
             ]
+
+            # Sort formats by height (descending)
             formats.sort(key=lambda x: x["height"], reverse=True)
-            return jsonify({"title": info["title"], "formats": formats})
+
+            return jsonify(
+                {
+                    "title": info["title"],
+                    "id": info["id"],
+                    "thumbnail": thumbnail,
+                    "formats": formats,
+                }
+            )
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
