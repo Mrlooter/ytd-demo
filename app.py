@@ -54,12 +54,21 @@ def index():
 def fetch_video():
     url = request.json.get("url")
     try:
-        with YoutubeDL({"quiet": True}) as ydl:
+        # Define yt-dlp options
+        ydl_opts = {
+            'nocheckcertificate': True,  # Skip SSL certificate verification
+            'cookies': 'cookies.txt',    # Use cookies from the exported file
+            'quiet': True,               # Suppress logs
+        }
+        
+        # Fetch video info
+        with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 
             # Extract the best thumbnail (if available)
             thumbnail = info.get("thumbnails", [{}])[-1].get("url", "")
 
+            # Filter formats for those with a minimum height of 480
             formats = [
                 {
                     "format_id": f["format_id"],
@@ -74,6 +83,7 @@ def fetch_video():
             # Sort formats by height (descending)
             formats.sort(key=lambda x: x["height"], reverse=True)
 
+            # Return the response
             return jsonify(
                 {
                     "title": info["title"],
