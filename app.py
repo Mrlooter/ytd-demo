@@ -56,9 +56,9 @@ def fetch_video():
     try:
         # Define yt-dlp options
         ydl_opts = {
-            'nocheckcertificate': True,  # Skip SSL certificate verification
-            'cookies': 'cookies.txt',    # Use cookies from the exported file
-            'quiet': True,               # Suppress logs
+            'cookies_from_browser': True,  # Extract cookies directly from the browser
+            'quiet': True,                 # Suppress logs
+            'nocheckcertificate': True,    # Skip SSL certificate verification (optional)
         }
         
         # Fetch video info
