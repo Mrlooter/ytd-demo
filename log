@@ -1,0 +1,17 @@
+[33mcommit 8619df4056e192d532fabc4fc7a2fe1b7dbcba07[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: Mrlooter <you@example.com>
+Date:   Thu Jan 9 06:04:02 2025 +0800
+
+    updated result display. Added styles for clean viewing. Removing unknown sizes from result
+
+[33mcommit 59d330efcfbe3521c8ec55dc3b908b41598d79f1[m
+Author: Mrlooter <you@example.com>
+Date:   Thu Jan 9 05:24:58 2025 +0800
+
+    first commit
+
+[33mcommit ce5072ca7c03b07119d60fae6c6f28965d9ea57e[m
+Author: Mrlooter <you@example.com>
+Date:   Thu Jan 9 05:18:46 2025 +0800
+
+    first commit
