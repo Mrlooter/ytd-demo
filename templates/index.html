@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Video Downloader</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Video Downloader</h1>
+        <div class="mt-3">
+            <input type="text" id="url" class="form-control" placeholder="Enter video URL">
+            <button class="btn btn-primary mt-3" onclick="fetchVideo()">Fetch Videos</button>
+        </div>
+        <div class="mt-4" id="video-options"></div>
+
+        <!-- Progress Modal -->
+        <div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="progressModalLabel">Download Progress</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress">
+                            <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%;"
+                                aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                        <div class="mt-3" id="download-modal-link" style="display: none;">
+                            <a href="#" id="modal-file-link" class="btn btn-success">Download File</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchVideo() {
+            const url = $('#url').val();
+            const response = await fetch('/fetch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url }),
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            const thumbnailUrl = `https://img.youtube.com/vi/${data.id}/0.jpg`; // Example thumbnail (YouTube specific)
+
+            let videoTable = `
+            <h4>Available Formats for: ${data.title}</h4>
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Thumbnail</th>
+                        <th>Format</th>
+                        <th>Size</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            data.formats.forEach((format, index) => {
+                videoTable += `
+                    <tr>
+                        ${index === 0 ? `<td rowspan="${data.formats.length}">
+                            <img src="${thumbnailUrl}" alt="Thumbnail" class="img-fluid" style="width: 150px;">
+                        </td>` : ''}
+                        <td>${format.height}p</td>
+                        <td>${format.size || 'Unknown'}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="downloadVideo('${url}', ${format.height})">Download</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            videoTable += `
+                </tbody>
+            </table>`;
+
+            $('#video-options').html(videoTable);
+        }
+
+        async function downloadVideo(url, quality) {
+            const downloadId = Date.now().toString();
+
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, quality, id: downloadId }),
+            });
+            const data = await response.json();
+
+            // Show the progress modal
+            const progressModal = new bootstrap.Modal(document.getElementById('progressModal'));
+            progressModal.show();
+
+            $('#download-modal-link').hide();
+            updateProgress(downloadId, progressModal);
+        }
+
+        function updateProgress(downloadId, progressModal) {
+            const interval = setInterval(async () => {
+                const response = await fetch(`/progress/${downloadId}`);
+                const progressData = await response.json();
+
+                if (progressData.status === 'completed') {
+                    clearInterval(interval);
+                    $('#progress-bar').css('width', '100%').text('100%').addClass('bg-success');
+
+                    // Show download button in the modal
+                    $('#download-modal-link').show();
+                    $('#modal-file-link').attr('href', `/file/${downloadId}`);
+                } else if (progressData.status === 'error') {
+                    clearInterval(interval);
+                    alert('Error: ' + progressData.error);
+                    progressModal.hide(); // Automatically close modal on error
+                } else {
+                    const progress = progressData.progress || 0;
+                    $('#progress-bar').css('width', progress + '%').text(progress + '%');
+                }
+            }, 1000);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
