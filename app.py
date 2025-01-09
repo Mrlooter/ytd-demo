@@ -44,7 +44,7 @@ def handle_progress(d, download_id):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("under_maintenance.html")
 
 @app.route("/fetch", methods=["POST"])
 def fetch_video():
