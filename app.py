@@ -1,8 +1,11 @@
-from flask import Flask, request, render_template, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from yt_dlp import YoutubeDL
-import threading
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+import pickle
 import os
-import re
 
 app = Flask(__name__)
 
@@ -11,6 +14,45 @@ os.makedirs(download_folder, exist_ok=True)
 
 downloads = {}  # To track downloads with status and progress
 
+# Function to simulate login and fetch cookies using Selenium
+def get_cookies_from_browser():
+    # Set up the Selenium WebDriver (use the appropriate path for your browser driver)
+    driver = webdriver.Chrome(executable_path='/path/to/chromedriver')
+
+    # Open the login page (replace with the actual login URL)
+    driver.get('https://example.com/login')
+
+    # Simulate login (replace with your own login fields and credentials)
+    username = driver.find_element(By.ID, 'username_field')
+    password = driver.find_element(By.ID, 'password_field')
+
+    # Replace with your credentials
+    username.send_keys('your_username')
+    password.send_keys('your_password')
+    password.send_keys(Keys.RETURN)
+
+    # Wait for the login to complete (adjust the time as needed)
+    time.sleep(5)
+
+    # Now, fetch the cookies
+    cookies = driver.get_cookies()
+
+    # Close the driver
+    driver.quit()
+
+    return cookies
+
+# Function to save cookies to a file
+def save_cookies(cookies, filename="cookies.pkl"):
+    with open(filename, 'wb') as file:
+        pickle.dump(cookies, file)
+
+# Function to load cookies from a file
+def load_cookies(filename="cookies.pkl"):
+    if os.path.exists(filename):
+        with open(filename, 'rb') as file:
+            return pickle.load(file)
+    return None
 
 def download_video(url, quality, download_id):
     try:
@@ -54,6 +96,14 @@ def index():
 def fetch_video():
     url = request.json.get("url")
     try:
+        # Check if cookies already exist
+        cookies = load_cookies()
+
+        if not cookies:
+            # If no cookies, simulate login and save cookies
+            cookies = get_cookies_from_browser()
+            save_cookies(cookies)
+            
         # Define yt-dlp options
         ydl_opts = {
             'cookies_from_browser': True,  # Extract cookies directly from the browser
