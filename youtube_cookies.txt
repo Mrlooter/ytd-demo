@@ -1,0 +1,4 @@
+# Netscape HTTP Cookie File
+# This is a comment. Lines starting with # are ignored.
+# Format: domain  flag  path  secure  expiration  name  value
+.youtube.com	TRUE	/	TRUE	1770597736	__Secure-3PSID	g.a000sAjFJx76b0njzeNyrbZ9E9ovkvsm2XTitfqoGw2uy1HTAr8fR7rM6Jw1odfpbCEV2ezUZAACgYKASISARcSFQHGX2Mi69JXjm7Xrk0IqtJZs67UehoVAUF8yKoXuILF4PDvfdfIf2dgwrvT0076
