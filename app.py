@@ -43,7 +43,7 @@ def handle_progress(d, download_id):
         downloads[download_id]["progress"] = 100
 
 @app.route("/")
-def index():
+def under_maintenance():
     return render_template("under_maintenance.html")
 
 @app.route("/fetch", methods=["POST"])
